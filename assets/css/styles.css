@@ -100,7 +100,7 @@ nav {
     height: 100%;
     background: radial-gradient(circle, rgba(107, 78, 113, 0.2), transparent);
     z-index: 0;
-}
+} 
 
 .hero h1 {
     font-size: 3.5rem;

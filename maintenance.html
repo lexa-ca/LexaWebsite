@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Lexa Beta: A secure platform for educators to manage and deliver assessments, upholding academic integrity. Download now!">
-    <meta name="keywords" content="Lexa Beta, education app, class management, student app, teacher app, beta version">
+    <meta name="description" content="Lexa is currently under maintenance. Check back soon for updates.">
+    <meta name="keywords" content="Lexa, maintenance, education app, under construction">
     <meta name="author" content="Your Name">
-    <title>Lexa - Task Hosting with Integrity</title>
+    <title>Lexa - Under Maintenance</title>
     <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="icon" href="assets/images/icons8-eagle-100.png">
@@ -19,23 +19,21 @@
             <span>Lexa <em>Beta</em></span>
         </div>
         <ul class="nav-links">
-            <li><a href="index.html" class="nav-link active">Home</a></li>
-            <li><a href="about.html" class="nav-link">About</a></li>
-            <li><a href="download.html" class="nav-link">Download</a></li>
+            <li><a href="index.html" class="nav-link active"></a></li>
+            <li><a href="about.html" class="nav-link"></a></li>
+            <li><a href="download.html" class="nav-link"></a></li>
         </ul>
-        <div class="hamburger">☰</div>
     </nav>
 
     <!-- Hero Section -->
     <section class="hero">
-        <h1>Lexa <em>Beta</em></h1>
-        <p>A secure platform for educators to manage and deliver assessments, upholding academic integrity.</p>
-        <a href="download.html" class="cta-button">Download Now</a>
+        <h1>Lexa is currently under maintenance</h1>
+        <p>We’re working hard to improve your experience. Please check back soon!</p>
     </section>
 
     <!-- Features Section -->
     <section class="features">
-        <h2>Why Choose Lexa <em>Beta</em>?</h2>
+        <h2>Why Choose Lexa?</h2>
         <div class="feature-grid">
             <div class="feature-card">
                 <h3>Task Distribution</h3>
@@ -63,7 +61,7 @@
 
     <!-- Footer -->
     <footer>
-        <p>© 2025 Lexa Beta. All rights reserved. | <a href="https://github.com/lexa-ca/LexaWebsite">GitHub</a> | <a href="mailto:noahwelld@gmail.com">Contact</a></p>
+        <p>© 2025 Lexa. All rights reserved. | <a href="https://github.com/lexa-ca/LexaWebsite">GitHub</a> | <a href="mailto:noahwelld@gmail.com">Contact</a></p>
     </footer>
 
     <script src="assets/js/script.js"></script>
@@ -72,11 +70,13 @@
         fetch('maintenance-trigger.txt')
             .then(response => response.text())
             .then(text => {
-                if (text.trim() === 'On') {
-                    window.location.href = 'maintenance.html';
+                if (text.trim() === 'On') { // if maintenance is on this means website is currently running if Off this means website is down// sad
+                    // Stay on maintenance page
+                } else {
+                    window.location.href = 'index.html';
                 }
             })
             .catch(error => console.error('Error fetching trigger:', error));
     </script>
 </body>
-</html>      
+</html>  
