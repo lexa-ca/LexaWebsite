@@ -44,8 +44,16 @@ nav {
 
 .logo span {
     font-size: 1.6rem;
-    font-weight: 600;
+    font-weight: 300;
     letter-spacing: 1px;
+}
+
+.logo span em {
+    font-size: 1.2rem; /* Smaller than logo text */
+    font-weight: 1000;
+    color: #c2b3d7;
+    margin-left: 0rem;
+    text-shadow: 0 0 8px rgba(138, 103, 145, 0.8), 0 0 12px rgba(138, 103, 145, 0.5); /* Glow effect */
 }
 
 .nav-links {
@@ -96,12 +104,19 @@ nav {
 
 .hero h1 {
     font-size: 3.5rem;
-    font-weight: 600;
+    font-weight: 300;
     margin-bottom: 1.2rem;
     letter-spacing: 1px;
     position: relative;
     z-index: 1;
     animation: fadeInDown 1s ease-out;
+}
+
+.hero h1 em {
+    font-size: 2rem; /* Smaller than h1 */
+    font-weight: 1000;
+    margin-left: 0rem;
+    text-shadow: 0 0 8px rgba(138, 103, 145, 0.8), 0 0 12px rgba(138, 103, 145, 0.5); /* Glow effect */
 }
 
 .hero p {
@@ -111,6 +126,12 @@ nav {
     position: relative;
     z-index: 1;
     animation: fadeIn 1.2s ease-out 0.3s forwards;
+}
+
+.hero p em {
+    font-size: 1.1rem; /* Smaller than p */
+    font-weight: 300;
+    text-shadow: 0 0 8px rgba(138, 103, 145, 0.8), 0 0 12px rgba(138, 103, 145, 0.5); /* Glow effect */
 }
 
 .cta-button {
@@ -141,10 +162,16 @@ nav {
 
 .features h2 {
     font-size: 2.8rem;
-    font-weight: 600;
+    font-weight: 300;
     margin-bottom: 2.5rem;
     letter-spacing: 1px;
     animation: fadeIn 1s ease-out;
+}
+
+.features h2 em {
+    font-size: 2rem; /* Smaller than h2 */
+    font-weight: 300;
+    text-shadow: 0 0 8px rgba(138, 103, 145, 0.8), 0 0 12px rgba(138, 103, 145, 0.5); /* Glow effect */
 }
 
 .feature-grid {
@@ -170,7 +197,7 @@ nav {
 
 .feature-card h3 {
     font-size: 1.6rem;
-    font-weight: 600;
+    font-weight: 300;
     margin-bottom: 0.8rem;
     color: #e0d5f5;
 }
@@ -189,9 +216,15 @@ nav {
 
 .screenshots h2 {
     font-size: 2.8rem;
-    font-weight: 600;
+    font-weight: 300;
     margin-bottom: 2.5rem;
     animation: fadeIn 1s ease-out;
+}
+
+.screenshots h2 em {
+    font-size: 2rem; /* Smaller than h2 */
+    font-weight: 300;
+    text-shadow: 0 0 8px rgba(138, 103, 145, 0.8), 0 0 12px rgba(138, 103, 145, 0.5); /* Glow effect */
 }
 
 .screenshot-grid {
@@ -237,16 +270,17 @@ nav {
 
 .download-card h2 {
     font-size: 2.2rem;
-    font-weight: 600;
+    font-weight: 300;
     margin-bottom: 1rem;
     color: #e0d5f5;
 }
 
 .download-card h2 em {
-    font-size: 1.2rem; /* Smaller than h2 */
-    font-weight: 400;
+    font-size: 1.6rem; /* Smaller than h2 */
+    font-weight: 200;
     color: #c2b3d7; /* Softer color for emphasis */
-    margin-left: 0.5rem;
+    margin-left: 0rem;
+    text-shadow: 0 0 8px rgba(138, 103, 145, 0.8), 0 0 12px rgba(138, 103, 145, 0.5); /* Glow effect */
 }
 
 .download-info {
@@ -271,7 +305,7 @@ nav {
 
 .requirements h2 {
     font-size: 2.2rem;
-    font-weight: 600;
+    font-weight: 300;
     margin-bottom: 2rem;
     color: #e0d5f5;
 }
@@ -319,7 +353,7 @@ nav {
 
 .about-card h2 {
     font-size: 2rem;
-    font-weight: 600;
+    font-weight: 300;
     margin-bottom: 1rem;
     color: #e0d5f5;
 }
@@ -328,6 +362,12 @@ nav {
     font-size: 1.1rem;
     color: #c2b3d7;
     line-height: 1.7;
+}
+
+.about-card p em {
+    font-size: 0.9rem; /* Smaller than p */
+    font-weight: 300;
+    text-shadow: 0 0 8px rgba(138, 103, 145, 0.8), 0 0 12px rgba(138, 103, 145, 0.5); /* Glow effect */
 }
 
 /* Team Section */
@@ -339,7 +379,7 @@ nav {
 
 .team h2 {
     font-size: 2.2rem;
-    font-weight: 600;
+    font-weight: 300;
     margin-bottom: 2.5rem;
     color: #e0d5f5;
 }
@@ -442,8 +482,28 @@ footer a:hover {
         font-size: 2.5rem;
     }
 
+    .hero h1 em {
+        font-size: 1.8rem; /* Adjusted for smaller screens */
+    }
+
     .hero p {
         font-size: 1.1rem;
+    }
+
+    .hero p em {
+        font-size: 0.9rem; /* Adjusted for smaller screens */
+    }
+
+    .features h2 em, .screenshots h2 em {
+        font-size: 1.5rem; /* Adjusted for smaller screens */
+    }
+
+    .download-card h2 em {
+        font-size: 1.2rem; /* Adjusted for smaller screens */
+    }
+
+    .about-card p em {
+        font-size: 0.8rem; /* Adjusted for smaller screens */
     }
 
     .about-card, .team-member {
@@ -464,13 +524,33 @@ footer a:hover {
         font-size: 2rem;
     }
 
+    .hero h1 em {
+        font-size: 1.4rem; /* Adjusted for smaller screens */
+    }
+
     .hero p {
         font-size: 1rem;
+    }
+
+    .hero p em {
+        font-size: 0.8rem; /* Adjusted for smaller screens */
     }
 
     .cta-button {
         padding: 0.7rem 1.5rem;
         font-size: 1rem;
+    }
+
+    .features h2 em, .screenshots h2 em {
+        font-size: 1.2rem; /* Adjusted for smaller screens */
+    }
+
+    .download-card h2 em {
+        font-size: 1rem; /* Adjusted for smaller screens */
+    }
+
+    .about-card p em {
+        font-size: 0.7rem; /* Adjusted for smaller screens */
     }
 
     .about-card, .team-member {
