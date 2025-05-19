@@ -1,83 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
-<head> 
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Lexa is under active development.
 As part of the beta phase, i'm making necessary changes to core systems. The app will be available again soon.">
     <meta name="keywords" content="Lexa, maintenance, education app, under construction">
     <meta name="author" content="Your Name">
-    <title>Lexa - Under Maintenance</title>
+    <title>Maintenance - Lexa</title>
     <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="icon" href="assets/images/icons8-eagle-100.png">
+    <!-- Firebase App (core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <!-- Firebase Authentication -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <!-- Firebase Realtime Database -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        body {
+            font-family: 'Josefin Sans', sans-serif;
+            background-color: #1a0f2e;
+            color: #e0d5f5;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 20px;
+        }
+        .maintenance-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .logo {
+            width: 100px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 400;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .status-timer {
+            background: rgba(107, 78, 113, 0.2);
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        .contact {
+            margin-top: 40px;
+            font-size: 0.9rem;
+            opacity: 0.6;
+        }
+        .contact a {
+            color: #e0d5f5;
+            text-decoration: underline;
+        }
+        em {
+            font-style: normal;
+            color: #8a6791;
+        }
+    </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav>
-        <div class="logo">
-            <img src="assets/images/icons8-eagle-100.png" alt="Lexa Logo" class="logo-img">
-            <span>Lexa <em>Beta</em></span>
+    <div class="maintenance-container">
+        <img src="assets/images/icons8-eagle-100.png" alt="Lexa Logo" class="logo">
+        <h1>Lexa <em>Beta</em> is Under Maintenance</h1>
+        <p>We're currently performing scheduled maintenance to improve our service. We'll be back online shortly.</p>
+        <div class="status-timer">Estimated completion: <span id="completion-time">Soon</span></div>
+        <p>Thank you for your patience as we work to make Lexa better for you.</p>
+        <div class="contact">
+            <p>Questions? <a href="mailto:noahwelld@gmail.com">Contact Support</a></p>
         </div>
-        <ul class="nav-links">
-            <li><a href="index.html" class="nav-link active"></a></li>
-            <li><a href="about.html" class="nav-link"></a></li>
-            <li><a href="download.html" class="nav-link"></a></li>
-        </ul>
-    </nav>
+    </div>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <h1>Lexa is under active development</h1>
-        <p>As part of the beta phase, i'm making necessary changes to core systems. The app will be available again soon.</p>
-    </section>
-
-    <!-- Features Section -->
-    <section class="features">
-        <h2>Why Choose Lexa?</h2>
-        <div class="feature-grid">
-            <div class="feature-card">
-                <h3>Task Distribution</h3>
-                <p>Create and assign tests, quizzes, and assessments on your terms.</p>
-            </div>
-            <div class="feature-card">
-                <h3>Controlled Task Sessions</h3>
-                <p>Tasks run in a secure environment with tools that help maintain focus and integrity during completion.</p>
-            </div>
-            <div class="feature-card">
-                <h3>Assessment Management</h3>
-                <p>Handle test workflows from setup to completion with confidence.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Screenshots Section -->
-    <section class="screenshots">
-        <h2>In-App Preview</h2>
-        <div class="screenshot-grid">
-            <img src="assets/images/screenshot1.png" alt="Lexa Class Joining">
-            <img src="assets/images/screenshot2.png" alt="Lexa Invite Code">
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <p>© 2025 Lexa. All rights reserved. | <a href="https://github.com/lexa-ca/LexaWebsite">GitHub</a> | <a href="mailto:noahwelld@gmail.com">Contact</a></p>
-    </footer>
-
-    <script src="assets/js/script.js"></script>
+    <script src="assets/js/firebase-auth.js"></script>
     <script>
-        // Check maintenance trigger
-        fetch('maintenance-trigger.txt')
-            .then(response => response.text())
-            .then(text => {
-                if (text.trim() === 'On') { // if maintenance is on this means website is currently running if Off this means website is down// sad
-                    // Stay on maintenance page
-                } else {
-                    window.location.href = 'index.html';
-                }
-            })
-            .catch(error => console.error('Error fetching trigger:', error));
+        // Check maintenance status every minute
+        function checkMaintenanceStatus() {
+            fetch('maintenance-trigger.txt?' + new Date().getTime())
+                .then(response => response.text())
+                .then(text => {
+                    if (text.trim() !== 'On') {
+                        window.location.href = 'index.html';
+                    }
+                })
+                .catch(error => console.error('Error fetching maintenance status:', error));
+        }
+
+        // Display a random completion time between 10-30 minutes
+        const randomMinutes = Math.floor(Math.random() * 21) + 10;
+        document.getElementById('completion-time').textContent = `${randomMinutes} minutes`;
+
+        // Check status every minute
+        setInterval(checkMaintenanceStatus, 60000);
     </script>
 </body>
 </html>  

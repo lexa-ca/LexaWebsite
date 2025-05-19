@@ -10,6 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="icon" href="assets/images/icons8-eagle-100.png">
+    <!-- Firebase App (core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <!-- Firebase Authentication -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <!-- Firebase Realtime Database -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
     <!-- Navigation -->
@@ -22,6 +28,7 @@
             <li><a href="index.html" class="nav-link active">Home</a></li>
             <li><a href="about.html" class="nav-link">About</a></li>
             <li><a href="download.html" class="nav-link">Download</a></li>
+            <li><a href="profile.html" class="nav-link">Profile</a></li>
         </ul>
         <div class="hamburger">☰</div>
     </nav>
@@ -67,6 +74,7 @@
     </footer>
 
     <script src="assets/js/script.js"></script>
+    <script src="assets/js/firebase-auth.js"></script>
     <script>
         // Check maintenance trigger
         fetch('maintenance-trigger.txt')
@@ -77,6 +85,16 @@
                 }
             })
             .catch(error => console.error('Error fetching trigger:', error));
+            
+        // Check if the user is logged in
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof onAuthStateChanged === 'function') {
+                onAuthStateChanged((user) => {
+                    // You can show/hide elements based on login status
+                    console.log('Auth state changed:', user ? 'logged in' : 'logged out');
+                });
+            }
+        });
     </script>
 </body>
 </html>      

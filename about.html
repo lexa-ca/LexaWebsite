@@ -6,7 +6,13 @@
     <title>About Lexa</title>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600&display=swap" rel="stylesheet">
-     <link rel="icon" href="assets/images/icons8-eagle-100.png">
+    <link rel="icon" href="assets/images/icons8-eagle-100.png">
+    <!-- Firebase App (core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <!-- Firebase Authentication -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <!-- Firebase Realtime Database -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body> 
     <nav>
@@ -14,12 +20,13 @@
             <img src="assets/images/icons8-eagle-100.png" alt="Lexa Logo" class="logo-img">
             <span>Lexa <em>Beta</em></span>
         </div>
-        <div class="hamburger">☰</div>
         <ul class="nav-links">
             <li><a href="index.html" class="nav-link">Home</a></li>
             <li><a href="about.html" class="nav-link active">About</a></li>
             <li><a href="download.html" class="nav-link">Download</a></li>
+            <li><a href="profile.html" class="nav-link">Profile</a></li>
         </ul>
+        <div class="hamburger">☰</div>
     </nav>
  
     <section class="hero">
@@ -30,8 +37,7 @@
     <section class="about-content">
         <div class="about-card">
             <h2>Our Mission</h2>
-<p>Lexa <em>Beta</em> was built to modernize how teachers run online exams. Beyond just hosting tests and tasks, Lexa empowers educators to track student activity in real time — helping prevent cheating and maintain academic fairness.</p>
-
+            <p>Lexa <em>Beta</em> was built to modernize how teachers run online exams. Beyond just hosting tests and tasks, Lexa empowers educators to track student activity in real time — helping prevent cheating and maintain academic fairness.</p>
         </div>
         <div class="about-card">
             <h2>Our Journey</h2>
@@ -52,10 +58,9 @@
     <footer>
         <p>© 2025 Lexa Beta. All rights reserved. | <a href="https://github.com/digimine9/Lexa">GitHub</a> | <a href="mailto:noahwelld@gmail.com">Contact</a></p>
     </footer>
-</body>
-</html>
 
-   <script src="assets/js/script.js"></script>
+    <script src="assets/js/script.js"></script>
+    <script src="assets/js/firebase-auth.js"></script>
     <script>
         // Check maintenance trigger
         fetch('maintenance-trigger.txt')
@@ -66,6 +71,16 @@
                 }
             })
             .catch(error => console.error('Error fetching trigger:', error));
+            
+        // Check if the user is logged in
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof onAuthStateChanged === 'function') {
+                onAuthStateChanged((user) => {
+                    // You can show/hide elements based on login status
+                    console.log('Auth state changed:', user ? 'logged in' : 'logged out');
+                });
+            }
+        });
     </script>
 </body>
 </html>      

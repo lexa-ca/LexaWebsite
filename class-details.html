@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Lexa Beta: Class Details - View tasks and information about your Lexa class.">
+    <meta name="keywords" content="Lexa Beta, class, tasks, assignments, education">
+    <meta name="author" content="Lexa">
+    <title>Lexa - Class Details</title>
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="icon" href="assets/images/icons8-eagle-100.png">
+    <!-- Firebase App (core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <!-- Firebase Authentication -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <!-- Firebase Realtime Database -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">
+            <img src="assets/images/icons8-eagle-100.png" alt="Lexa Logo" class="logo-img">
+            <span>Lexa <em>Beta</em></span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="index.html" class="nav-link">Home</a></li>
+            <li><a href="profile.html" class="nav-link">Dashboard</a></li>
+            <li><a href="#" id="sign-out-btn" class="nav-link">Sign Out</a></li>
+        </ul>
+        <div class="hamburger">☰</div>
+    </nav>
+
+    <!-- Class Details Section -->
+    <section class="profile-section">
+        <div class="profile-container">
+            <div class="class-header">
+                <a href="profile.html" class="back-link">← Back to Dashboard</a>
+                <h1 id="class-name">Class Name</h1>
+                <div class="class-info">
+                    <p>Description: <span id="class-description">Loading...</span></p>
+                    <p>Class Code: <span id="class-code">Loading...</span></p>
+                </div>
+                
+                <!-- Add dashboard navigation for students -->
+                <div id="dashboard-nav" class="dashboard-nav" style="display: none;">
+                    <button id="show-tasks-btn" class="dashboard-nav-btn active">Tasks</button>
+                    <button id="show-dashboard-btn" class="dashboard-nav-btn">Your Dashboard</button>
+                </div>
+            </div>
+
+            <div class="class-content">
+                <div class="class-section">
+                    <h2>Tasks</h2>
+                    <div id="tasks-list" class="items-list">
+                        <!-- Tasks will be listed here -->
+                        <p>Loading tasks...</p>
+                    </div>
+                </div>
+                
+                <!-- Add new section for student dashboard -->
+                <div id="student-dashboard-section" class="class-section" style="display: none;">
+                    <h2>Your Dashboard</h2>
+                    <div class="student-stats">
+                        <div class="stat-card">
+                            <h4>Tasks Completed</h4>
+                            <p id="tasks-completed">0 / 0</p>
+                            <div class="progress-bar">
+                                <div class="progress" id="tasks-progress" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Average Score</h4>
+                            <p id="average-score">N/A</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Upcoming Tasks</h4>
+                            <p id="upcoming-tasks">0</p>
+                        </div>
+                    </div>
+                    
+                    <div class="recent-activity">
+                        <h3>Recent Activity</h3>
+                        <div id="activity-list" class="activity-list">
+                            <!-- Activity items will be added here -->
+                            <p>No recent activity.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="submissions-summary">
+                        <h3>Your Submissions</h3>
+                        <div id="submissions-summary-list" class="summary-list">
+                            <!-- Summary of submissions will be added here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Add new section for submissions -->
+                <div id="submissions-section" class="class-section" style="display: none;">
+                    <h2>Task Submissions</h2>
+                    <a href="#" id="back-to-tasks" class="back-link">← Back to Tasks</a>
+                    <h3 id="current-task-name">Task Name</h3>
+                    <div id="submissions-list" class="items-list">
+                        <!-- Submissions will be listed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2025 Lexa Beta. All rights reserved. | <a href="https://github.com/lexa-ca/LexaWebsite">GitHub</a> | <a href="mailto:noahwelld@gmail.com">Contact</a></p>
+    </footer>
+
+    <script src="assets/js/script.js"></script>
+    <script src="assets/js/firebase-auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get class ID from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const classId = urlParams.get('id');
+            const ownerId = urlParams.get('owner');
+            const userRole = urlParams.get('role');
+            
+            if (!classId || !ownerId) {
+                window.location.href = 'profile.html';
+                return;
+            }
+            
+            // Close task menu dropdowns when clicking elsewhere
+            document.addEventListener('click', () => {
+                document.querySelectorAll('.task-menu-dropdown').forEach(dropdown => {
+                    dropdown.style.display = 'none';
+                });
+            });
+            
+            // Initialize UI elements
+            const className = document.getElementById('class-name');
+            const classDescription = document.getElementById('class-description');
+            const classCode = document.getElementById('class-code');
+            const tasksList = document.getElementById('tasks-list');
+            const signOutBtn = document.getElementById('sign-out-btn');
+            
+            // New elements for submissions view
+            const submissionsSection = document.getElementById('submissions-section');
+            const currentTaskName = document.getElementById('current-task-name');
+            const submissionsList = document.getElementById('submissions-list');
+            const backToTasksLink = document.getElementById('back-to-tasks');
+            
+            // Student dashboard elements
+            const dashboardNav = document.getElementById('dashboard-nav');
+            const showTasksBtn = document.getElementById('show-tasks-btn');
+            const showDashboardBtn = document.getElementById('show-dashboard-btn');
+            const studentDashboardSection = document.getElementById('student-dashboard-section');
+            
+            // Current task references (for submissions viewing)
+            let currentTask = null;
+            let classInfoRef = null;
+            
+            // Handle back to tasks link
+            backToTasksLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                submissionsSection.style.display = 'none';
+                
+                // Show the appropriate section based on active tab
+                if (showDashboardBtn && showDashboardBtn.classList.contains('active')) {
+                    studentDashboardSection.style.display = 'block';
+                } else {
+                    document.querySelector('.class-section').style.display = 'block';
+                }
+            });
+            
+            // Handle sign out
+            signOutBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                signOut()
+                    .then(() => {
+                        window.location.href = 'index.html';
+                    })
+                    .catch(error => {
+                        console.error('Error signing out:', error);
+                    });
+            });
+            
+            // Check if user is authenticated
+            onAuthStateChanged((user) => {
+                if (!user) {
+                    // Redirect to login if not authenticated
+                    window.location.href = 'profile.html';
+                    return;
+                }
+                
+                // Load class details
+                loadClassDetails(ownerId, classId, user.uid);
+            });
+            
+            // Load class details
+            function loadClassDetails(ownerId, classId, currentUserId) {
+                // Fetch class details
+                database.ref('users/' + ownerId + '/classes/' + classId)
+                    .once('value')
+                    .then((snapshot) => {
+                        const classInfo = snapshot.val();
+                        if (!classInfo) {
+                            console.error('Class not found');
+                            className.textContent = 'Class Not Found';
+                            classDescription.textContent = 'This class does not exist or you do not have access to it.';
+                            classCode.textContent = 'N/A';
+                            tasksList.innerHTML = '<p>No tasks available</p>';
+                            return;
+                        }
+                        
+                        // Store class info for later use
+                        classInfoRef = classInfo;
+                        
+                        // Update UI with class details
+                        className.textContent = classInfo.name || 'Unnamed Class';
+                        classDescription.textContent = classInfo.description || 'No description available';
+                        classCode.textContent = classInfo.classCode || 'N/A';
+                        
+                        // Show dashboard navigation for students only
+                        if (userRole === 'student') {
+                            dashboardNav.style.display = 'flex';
+                        }
+                        
+                        // Load tasks
+                        loadTasks(ownerId, classId, classInfo, currentUserId, userRole);
+                        
+                        // Initialize student dashboard if student
+                        if (userRole === 'student') {
+                            initializeStudentDashboard(classInfo, currentUserId);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading class details:', error);
+                        className.textContent = 'Error Loading Class';
+                        classDescription.textContent = 'There was an error loading this class. Please try again later.';
+                        tasksList.innerHTML = '<p>Error loading tasks</p>';
+                    });
+            }
+            
+            // Load tasks for the class
+            function loadTasks(ownerId, classId, classInfo, currentUserId, userRole) {
+                tasksList.innerHTML = '';
+                
+                if (!classInfo.tasks || Object.keys(classInfo.tasks).length === 0) {
+                    // Message is slightly different for teachers vs students
+                    if (userRole === 'teacher' || userRole === 'admin') {
+                        tasksList.innerHTML = `
+                            <div class="item-card" style="text-align: center;">
+                                <h4>No Tasks Available</h4>
+                                <p>Tasks can only be created through the Lexa app.</p>
+                                <p>Please download the app to create and manage tasks for this class.</p>
+                                <a href="download.html" class="start-task-btn" style="display: inline-block; margin-top: 15px;">Download App</a>
+                            </div>`;
+                    } else {
+                        tasksList.innerHTML = `
+                            <div class="item-card" style="text-align: center;">
+                                <h4>No Tasks Available</h4>
+                                <p>There are no tasks available for this class yet.</p>
+                            </div>`;
+                    }
+                    return;
+                }
+                
+                Object.entries(classInfo.tasks).forEach(([taskId, taskInfo]) => {
+                    const taskCard = document.createElement('div');
+                    taskCard.className = 'item-card task-card';
+                    
+                    // Check if student has a submission for this task
+                    let submissionStatus = '';
+                    if (userRole === 'student' && taskInfo.submissions && taskInfo.submissions[currentUserId]) {
+                        const submission = taskInfo.submissions[currentUserId];
+                        if (submission.isGraded) {
+                            submissionStatus = `
+                                <div class="task-status completed">
+                                    <p>Status: Graded</p>
+                                    <p>Score: ${submission.score}</p>
+                                    <p>Feedback: ${submission.feedback || 'None'}</p>
+                                </div>
+                            `;
+                        } else {
+                            submissionStatus = `
+                                <div class="task-status submitted">
+                                    <p>Status: Submitted (Waiting for grading)</p>
+                                </div>
+                            `;
+                        }
+                    } else if (userRole === 'student') {
+                        submissionStatus = `
+                            <div class="task-status pending">
+                                <p>Status: Not submitted</p>
+                                <button class="start-task-btn" data-task-id="${taskId}">Start Task</button>
+                            </div>
+                        `;
+                    }
+                    
+                    // Check if teacher/admin view and show submission stats
+                    let teacherControls = '';
+                    if (userRole === 'teacher' || userRole === 'admin') {
+                        const totalSubmissions = taskInfo.submissions ? Object.keys(taskInfo.submissions).length : 0;
+                        const gradedSubmissions = taskInfo.submissions ? 
+                            Object.values(taskInfo.submissions).filter(s => s.isGraded).length : 0;
+                        
+                        teacherControls = `
+                            <div class="task-teacher-controls">
+                                <p>Submissions: ${totalSubmissions} (${gradedSubmissions} graded)</p>
+                                <div class="task-buttons">
+                                    <button class="view-submissions-btn" data-task-id="${taskId}">View Submissions</button>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    // Build the task card content
+                    taskCard.innerHTML = `
+                        <div class="task-header">
+                            <h4>${taskInfo.name || 'Unnamed Task'}</h4>
+                            ${userRole === 'teacher' || userRole === 'admin' ? 
+                                `<div class="task-menu-container">
+                                    <button class="task-menu-btn" data-task-id="${taskId}">
+                                        <span class="dots"></span>
+                                    </button>
+                                    <div class="task-menu-dropdown">
+                                        <ul>
+                                            <li class="delete-task" data-task-id="${taskId}">Delete Task</li>
+                                        </ul>
+                                    </div>
+                                </div>` : ''}
+                        </div>
+                        <p>Time Limit: ${taskInfo.timerMinutes || 0} minutes</p>
+                        <p>Questions: ${taskInfo.questions ? (Array.isArray(taskInfo.questions) ? taskInfo.questions.length : Object.keys(taskInfo.questions).length) : 0}</p>
+                        ${submissionStatus}
+                        ${teacherControls}
+                    `;
+                    
+                    // Add event listener to start task button if it exists
+                    taskCard.querySelectorAll('.start-task-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            alert('Tasks can only be completed through the Lexa app. Please download the app to work on tasks.');
+                            // Redirect to download page after alert
+                            window.location.href = 'download.html';
+                        });
+                    });
+                    
+                    // Add event listener for view submissions button (teacher/admin only)
+                    taskCard.querySelectorAll('.view-submissions-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            const taskId = btn.getAttribute('data-task-id');
+                            currentTask = classInfo.tasks[taskId];
+                            currentTask.id = taskId; // Store the task ID
+                            viewSubmissions(currentTask, ownerId, classId);
+                        });
+                    });
+                    
+                    // Add event listeners for task menu
+                    taskCard.querySelectorAll('.task-menu-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            // Close all other dropdowns first
+                            document.querySelectorAll('.task-menu-dropdown').forEach(dropdown => {
+                                dropdown.style.display = 'none';
+                            });
+                            
+                            const dropdown = btn.nextElementSibling;
+                            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+                        });
+                    });
+                    
+                    // Add event listener for delete task option
+                    taskCard.querySelectorAll('.delete-task').forEach(item => {
+                        item.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            const taskId = item.getAttribute('data-task-id');
+                            
+                            // Create and show confirmation dialog
+                            showDeleteConfirmation(ownerId, classId, taskId, classInfo.tasks[taskId].name);
+                        });
+                    });
+                    
+                    tasksList.appendChild(taskCard);
+                });
+            }
+            
+            // Function to view submissions for a specific task
+            function viewSubmissions(task, ownerId, classId) {
+                // Show submissions section and hide tasks section
+                document.querySelector('.class-section').style.display = 'none';
+                submissionsSection.style.display = 'block';
+                
+                // Update task name
+                currentTaskName.textContent = task.name || 'Unnamed Task';
+                
+                // Clear submissions list
+                submissionsList.innerHTML = '';
+                
+                // Check if there are submissions
+                if (!task.submissions || Object.keys(task.submissions).length === 0) {
+                    submissionsList.innerHTML = '<p>No submissions available for this task.</p>';
+                    return;
+                }
+                
+                // Sort submissions by date (newest first) and grading status
+                const sortedSubmissions = Object.entries(task.submissions)
+                    .map(([studentId, submission]) => ({
+                        ...submission,
+                        studentId
+                    }))
+                    .sort((a, b) => {
+                        // First sort by graded status (pending first)
+                        if (a.isGraded !== b.isGraded) {
+                            return a.isGraded ? 1 : -1;
+                        }
+                        // Then by submission date (if available)
+                        if (a.submissionDate && b.submissionDate) {
+                            return new Date(b.submissionDate) - new Date(a.submissionDate);
+                        }
+                        return 0;
+                    });
+                
+                // Create submission cards
+                sortedSubmissions.forEach(submission => {
+                    const submissionCard = document.createElement('div');
+                    submissionCard.className = 'item-card' + (submission.isGraded ? ' graded' : ' pending');
+                    
+                    // Format submission date
+                    const submissionDate = submission.submissionDate ? 
+                        new Date(submission.submissionDate).toLocaleString() : 'Unknown date';
+                    
+                    // Determine status and controls based on grading
+                    let statusEl = '';
+                    let gradingControls = '';
+                    
+                    if (submission.isGraded) {
+                        statusEl = `<p class="submission-status completed">Status: Graded</p>`;
+                        gradingControls = `
+                            <div class="grading-details">
+                                <p>Score: ${submission.score || 0}</p>
+                                <p>Feedback: ${submission.feedback || 'None'}</p>
+                                <button class="grade-btn" data-student-id="${submission.studentId}">Edit Grade</button>
+                            </div>
+                        `;
+                    } else {
+                        statusEl = `<p class="submission-status pending">Status: Pending</p>`;
+                        gradingControls = `
+                            <div class="grading-controls">
+                                <button class="grade-btn" data-student-id="${submission.studentId}">Grade</button>
+                            </div>
+                        `;
+                    }
+                    
+                    // Build the submission card content
+                    submissionCard.innerHTML = `
+                        <h4>${submission.studentName || 'Student'}</h4>
+                        <p>Submitted: ${submissionDate}</p>
+                        ${statusEl}
+                        ${gradingControls}
+                    `;
+                    
+                    // Add event listener for grade button
+                    submissionCard.querySelectorAll('.grade-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            const studentId = btn.getAttribute('data-student-id');
+                            showGradingModal(task, submission, ownerId, classId);
+                        });
+                    });
+                    
+                    submissionsList.appendChild(submissionCard);
+                });
+            }
+            
+            // Function to show grading modal
+            function showGradingModal(task, submission, ownerId, classId) {
+                // Create modal container
+                const modalOverlay = document.createElement('div');
+                modalOverlay.className = 'modal-overlay';
+                document.body.appendChild(modalOverlay);
+                
+                // Calculate auto score based on correct answers (if questions have correct answers defined)
+                let autoScore = 0;
+                let maxScore = 0;
+                
+                if (task.questions) {
+                    // Convert questions object to array if needed
+                    const questionsArray = Array.isArray(task.questions) ? 
+                        task.questions : Object.values(task.questions);
+                    
+                    questionsArray.forEach((question, index) => {
+                        if (question.points) {
+                            maxScore += question.points;
+                        }
+                        
+                        if (submission.answers && submission.answers[index] !== undefined) {
+                            const userAnswer = submission.answers[index];
+                            // For multiple choice questions
+                            if (question.correctOption !== undefined && userAnswer === question.correctOption) {
+                                autoScore += question.points || 1;
+                            }
+                            // For text questions with exact match
+                            else if (question.correctAnswer && userAnswer === question.correctAnswer) {
+                                autoScore += question.points || 1;
+                            }
+                        }
+                    });
+                }
+                
+                // Create modal content
+                const modal = document.createElement('div');
+                modal.className = 'grading-modal';
+                modal.innerHTML = `
+                    <h3>Grade Submission</h3>
+                    <h4>Student: ${submission.studentName || 'Student'}</h4>
+                    <p>Task: ${task.name}</p>
+                    <p>Submitted: ${submission.submissionDate ? new Date(submission.submissionDate).toLocaleString() : 'Unknown'}</p>
+                    
+                    <div class="answers-section">
+                        <h4>Student Answers</h4>
+                        <div class="answers-list">
+                            ${createAnswersList(task, submission)}
+                        </div>
+                    </div>
+                    
+                    <div class="grading-form">
+                        <div class="form-group">
+                            <label for="score">Score (out of ${maxScore}):</label>
+                            <input type="number" id="score" value="${submission.isGraded ? submission.score : autoScore}" min="0" max="${maxScore}">
+                        </div>
+                        <div class="form-group">
+                            <label for="feedback">Feedback:</label>
+                            <textarea id="feedback" rows="3">${submission.feedback || ''}</textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button id="cancel-grading" class="secondary-btn">Cancel</button>
+                        <button id="save-grade" class="primary-btn">Save Grade</button>
+                    </div>
+                `;
+                
+                modalOverlay.appendChild(modal);
+                
+                // Handle cancel button
+                document.getElementById('cancel-grading').addEventListener('click', () => {
+                    modalOverlay.remove();
+                });
+                
+                // Handle save grade button
+                document.getElementById('save-grade').addEventListener('click', () => {
+                    const score = parseInt(document.getElementById('score').value, 10) || 0;
+                    const feedback = document.getElementById('feedback').value || '';
+                    
+                    // Update submission with grade
+                    submission.isGraded = true;
+                    submission.score = score;
+                    submission.feedback = feedback;
+                    
+                    // Save to Firebase
+                    saveGradeToFirebase(ownerId, classId, task.id, submission)
+                        .then(() => {
+                            // Update local data
+                            if (classInfoRef && classInfoRef.tasks && classInfoRef.tasks[task.id]) {
+                                if (!classInfoRef.tasks[task.id].submissions) {
+                                    classInfoRef.tasks[task.id].submissions = {};
+                                }
+                                classInfoRef.tasks[task.id].submissions[submission.studentId] = submission;
+                            }
+                            
+                            // Close modal
+                            modalOverlay.remove();
+                            
+                            // Refresh submissions view
+                            viewSubmissions(currentTask, ownerId, classId);
+                        })
+                        .catch(error => {
+                            alert('Error saving grade: ' + error.message);
+                            console.error('Error saving grade:', error);
+                        });
+                });
+            }
+            
+            // Helper function to create answers list HTML
+            function createAnswersList(task, submission) {
+                if (!task.questions || !submission.answers) {
+                    return '<p>No answers available.</p>';
+                }
+                
+                // Convert questions object to array if needed
+                const questionsArray = Array.isArray(task.questions) ? 
+                    task.questions : Object.values(task.questions);
+                
+                let answersHtml = '';
+                
+                questionsArray.forEach((question, index) => {
+                    const userAnswer = submission.answers[index] !== undefined ? 
+                        submission.answers[index] : 'No answer provided';
+                    
+                    let correctAnswer = '';
+                    if (question.correctOption !== undefined && question.options) {
+                        correctAnswer = `<p class="correct-answer">Correct: ${question.options[question.correctOption]}</p>`;
+                    } else if (question.correctAnswer) {
+                        correctAnswer = `<p class="correct-answer">Correct: ${question.correctAnswer}</p>`;
+                    }
+                    
+                    answersHtml += `
+                        <div class="answer-item">
+                            <p class="question-text">Q${index + 1}: ${question.text || 'Question'}</p>
+                            <p class="student-answer">Answer: ${userAnswer}</p>
+                            ${correctAnswer}
+                            <p class="points">Points: ${question.points || 1}</p>
+                        </div>
+                    `;
+                });
+                
+                return answersHtml || '<p>No answers available.</p>';
+            }
+            
+            // Function to save grade to Firebase
+            function saveGradeToFirebase(ownerId, classId, taskId, submission) {
+                const updates = {};
+                updates[`users/${ownerId}/classes/${classId}/tasks/${taskId}/submissions/${submission.studentId}/isGraded`] = true;
+                updates[`users/${ownerId}/classes/${classId}/tasks/${taskId}/submissions/${submission.studentId}/score`] = submission.score;
+                updates[`users/${ownerId}/classes/${classId}/tasks/${taskId}/submissions/${submission.studentId}/feedback`] = submission.feedback;
+                
+                return database.ref().update(updates);
+            }
+            
+            // Function to show delete confirmation dialog
+            function showDeleteConfirmation(ownerId, classId, taskId, taskName) {
+                // Create modal container
+                const modalOverlay = document.createElement('div');
+                modalOverlay.className = 'modal-overlay';
+                document.body.appendChild(modalOverlay);
+                
+                // Create confirmation dialog
+                const dialog = document.createElement('div');
+                dialog.className = 'confirmation-dialog';
+                dialog.innerHTML = `
+                    <h3>Delete Task</h3>
+                    <p>Are you sure you want to delete the task "${taskName || 'Unnamed Task'}"?</p>
+                    <p class="warning">This action cannot be undone and will terminate any active sessions for this task.</p>
+                    <div class="confirmation-buttons">
+                        <button id="cancel-delete" class="secondary-btn">Cancel</button>
+                        <button id="confirm-delete" class="confirm-delete-btn">Delete Task</button>
+                    </div>
+                `;
+                
+                modalOverlay.appendChild(dialog);
+                
+                // Handle cancel button
+                document.getElementById('cancel-delete').addEventListener('click', () => {
+                    modalOverlay.remove();
+                });
+                
+                // Handle confirm delete button
+                document.getElementById('confirm-delete').addEventListener('click', () => {
+                    deleteTask(ownerId, classId, taskId)
+                        .then(() => {
+                            // Update local data
+                            if (classInfoRef && classInfoRef.tasks) {
+                                delete classInfoRef.tasks[taskId];
+                            }
+                            
+                            // Close modal
+                            modalOverlay.remove();
+                            
+                            // Refresh tasks view
+                            loadTasks(ownerId, classId, classInfoRef, firebase.auth().currentUser.uid, userRole);
+                        })
+                        .catch(error => {
+                            alert('Error deleting task: ' + error.message);
+                            console.error('Error deleting task:', error);
+                        });
+                });
+            }
+            
+            // Function to delete task from Firebase
+            function deleteTask(ownerId, classId, taskId) {
+                return database.ref(`users/${ownerId}/classes/${classId}/tasks/${taskId}`).remove();
+            }
+
+            // Handle navigation between tasks and dashboard (for students)
+            if (showTasksBtn) {
+                showTasksBtn.addEventListener('click', () => {
+                    // Show tasks, hide dashboard
+                    document.querySelector('.class-section').style.display = 'block';
+                    studentDashboardSection.style.display = 'none';
+                    submissionsSection.style.display = 'none';
+                    
+                    // Update active button
+                    showTasksBtn.classList.add('active');
+                    showDashboardBtn.classList.remove('active');
+                });
+            }
+            
+            if (showDashboardBtn) {
+                showDashboardBtn.addEventListener('click', () => {
+                    // Show dashboard, hide tasks and submissions
+                    document.querySelector('.class-section').style.display = 'none';
+                    studentDashboardSection.style.display = 'block';
+                    submissionsSection.style.display = 'none';
+                    
+                    // Update active button
+                    showTasksBtn.classList.remove('active');
+                    showDashboardBtn.classList.add('active');
+                });
+            }
+
+            // Function to initialize the student dashboard
+            function initializeStudentDashboard(classInfo, studentId) {
+                const tasksCompletedEl = document.getElementById('tasks-completed');
+                const tasksProgressEl = document.getElementById('tasks-progress');
+                const averageScoreEl = document.getElementById('average-score');
+                const upcomingTasksEl = document.getElementById('upcoming-tasks');
+                const activityListEl = document.getElementById('activity-list');
+                const submissionsSummaryEl = document.getElementById('submissions-summary-list');
+                
+                // Default values
+                let totalTasks = 0;
+                let completedTasks = 0;
+                let totalScore = 0;
+                let gradedSubmissionsCount = 0;
+                let upcomingTasksCount = 0;
+                
+                // Clear previous content
+                activityListEl.innerHTML = '';
+                submissionsSummaryEl.innerHTML = '';
+                
+                // If no tasks, show message
+                if (!classInfo.tasks || Object.keys(classInfo.tasks).length === 0) {
+                    tasksCompletedEl.textContent = '0 / 0';
+                    tasksProgressEl.style.width = '0%';
+                    averageScoreEl.textContent = 'N/A';
+                    upcomingTasksEl.textContent = '0';
+                    activityListEl.innerHTML = '<p>No activity yet.</p>';
+                    submissionsSummaryEl.innerHTML = '<p>No submissions yet.</p>';
+                    return;
+                }
+                
+                // Process tasks
+                const taskEntries = Object.entries(classInfo.tasks);
+                totalTasks = taskEntries.length;
+                const activities = [];
+                const submissions = [];
+                
+                taskEntries.forEach(([taskId, task]) => {
+                    // Check if student has a submission for this task
+                    if (task.submissions && task.submissions[studentId]) {
+                        const submission = task.submissions[studentId];
+                        
+                        // Add to submissions list for dashboard
+                        submissions.push({
+                            taskId,
+                            taskName: task.name,
+                            submission,
+                            submissionDate: submission.submissionDate ? new Date(submission.submissionDate) : null
+                        });
+                        
+                        // Add to activity list
+                        if (submission.submissionDate) {
+                            activities.push({
+                                type: 'submission',
+                                date: new Date(submission.submissionDate),
+                                text: `You submitted the task "${task.name}"`,
+                                taskId
+                            });
+                        }
+                        
+                        // If graded, add to completed tasks and calculate score
+                        if (submission.isGraded) {
+                            completedTasks++;
+                            totalScore += submission.score || 0;
+                            gradedSubmissionsCount++;
+                            
+                            // Add grading to activity list
+                            activities.push({
+                                type: 'grading',
+                                date: new Date(submission.submissionDate), // Using submission date as fallback
+                                text: `Your submission for "${task.name}" was graded with a score of ${submission.score || 0}`,
+                                taskId
+                            });
+                        }
+                    } else {
+                        // Task not yet submitted
+                        upcomingTasksCount++;
+                    }
+                });
+                
+                // Update dashboard statistics
+                tasksCompletedEl.textContent = `${completedTasks} / ${totalTasks}`;
+                const progressPercentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+                tasksProgressEl.style.width = `${progressPercentage}%`;
+                
+                averageScoreEl.textContent = gradedSubmissionsCount > 0 ? 
+                    Math.round(totalScore / gradedSubmissionsCount * 10) / 10 : 'N/A';
+                
+                upcomingTasksEl.textContent = upcomingTasksCount;
+                
+                // Sort activities by date (newest first)
+                activities.sort((a, b) => b.date - a.date);
+                
+                // Display recent activities (up to 5)
+                if (activities.length > 0) {
+                    activityListEl.innerHTML = '';
+                    activities.slice(0, 5).forEach(activity => {
+                        const activityItem = document.createElement('div');
+                        activityItem.className = `activity-item ${activity.type}`;
+                        activityItem.innerHTML = `
+                            <div class="timestamp">${formatDate(activity.date)}</div>
+                            <div class="activity-text">${activity.text}</div>
+                        `;
+                        activityListEl.appendChild(activityItem);
+                    });
+                } else {
+                    activityListEl.innerHTML = '<p>No activity yet.</p>';
+                }
+                
+                // Sort submissions by date (newest first)
+                submissions.sort((a, b) => {
+                    if (!a.submissionDate) return 1;
+                    if (!b.submissionDate) return -1;
+                    return b.submissionDate - a.submissionDate;
+                });
+                
+                // Display submissions summary
+                if (submissions.length > 0) {
+                    submissionsSummaryEl.innerHTML = '';
+                    submissions.forEach(item => {
+                        const summaryItem = document.createElement('div');
+                        summaryItem.className = 'summary-item';
+                        
+                        // Determine status class and text
+                        const isGraded = item.submission.isGraded;
+                        const statusClass = isGraded ? 'score' : 'score pending';
+                        const statusText = isGraded ? 
+                            `Score: ${item.submission.score || 0}` : 
+                            'Status: Awaiting Grading';
+                        
+                        summaryItem.innerHTML = `
+                            <div class="timestamp">${item.submissionDate ? formatDate(item.submissionDate) : 'Date Unknown'}</div>
+                            <div class="summary-title">${item.taskName || 'Unnamed Task'}</div>
+                            <div class="${statusClass}">${statusText}</div>
+                            ${isGraded && item.submission.feedback ? 
+                                `<div class="feedback">Feedback: ${item.submission.feedback}</div>` : ''}
+                        `;
+                        
+                        submissionsSummaryEl.appendChild(summaryItem);
+                    });
+                } else {
+                    submissionsSummaryEl.innerHTML = '<p>No submissions yet.</p>';
+                }
+            }
+            
+            // Helper function to format dates
+            function formatDate(date) {
+                if (!date) return 'Unknown date';
+                
+                const now = new Date();
+                const diff = Math.floor((now - date) / (1000 * 60)); // Difference in minutes
+                
+                if (diff < 1) return 'Just now';
+                if (diff < 60) return `${diff} minute${diff === 1 ? '' : 's'} ago`;
+                
+                const hoursDiff = Math.floor(diff / 60);
+                if (hoursDiff < 24) return `${hoursDiff} hour${hoursDiff === 1 ? '' : 's'} ago`;
+                
+                const daysDiff = Math.floor(hoursDiff / 24);
+                if (daysDiff < 7) return `${daysDiff} day${daysDiff === 1 ? '' : 's'} ago`;
+                
+                // For older dates, show full date
+                return date.toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+        });
+    </script>
+</body>
+</html> 

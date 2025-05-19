@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Lexa Beta: User Dashboard - Manage your Lexa account and view your details.">
+    <meta name="keywords" content="Lexa Beta, dashboard, account, user information">
+    <meta name="author" content="Your Name">
+    <title>Lexa - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="icon" href="assets/images/icons8-eagle-100.png">
+    <!-- Firebase App (core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <!-- Firebase Authentication -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <!-- Firebase Realtime Database -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">
+            <img src="assets/images/icons8-eagle-100.png" alt="Lexa Logo" class="logo-img">
+            <span>Lexa <em>Beta</em></span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="index.html" class="nav-link">Home</a></li>
+            <li><a href="profile.html" class="nav-link active">Dashboard</a></li>
+            <li><a href="#" id="sign-out-btn" class="nav-link">Sign Out</a></li>
+        </ul>
+        <div class="hamburger">☰</div>
+    </nav>
+
+    <!-- Dashboard Section -->
+    <section class="dashboard-section">
+        <div id="login-container">
+            <h2>Sign In</h2>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" placeholder="Your email">
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" placeholder="Your password">
+            </div>
+            <div class="button-group">
+                <button id="login-btn" class="primary-btn">Sign In</button>
+            </div>
+            <p class="error-message" id="login-error"></p>
+            <div class="account-note">
+                <p>To create a new student or admin account, please <a href="download.html">download the Lexa app</a>.</p>
+            </div>
+        </div>
+
+        <div id="dashboard-container" style="display: none;">
+            <div class="dashboard-sidebar collapsed">
+                <div class="sidebar-header">
+                    <h3>Account Details</h3>
+                    <button class="toggle-sidebar" id="toggle-sidebar" aria-label="Toggle account details">
+                        <span class="toggle-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </span>
+                    </button>
+                </div>
+                <div class="user-info-sidebar hidden" id="user-info-sidebar">
+                    <h2>Welcome, <span id="user-display-name">User</span>!</h2>
+                    <ul class="user-details-list">
+                        <li>Email: <span id="user-email"></span></li>
+                        <li>User Type: <span id="user-type"></span></li>
+                        <li>School: <span id="user-school"></span></li>
+                        <li>PIN: <span id="user-pin"></span></li>
+                        <li>Country: <span id="user-country"></span></li>
+                        <li>Province: <span id="user-province"></span></li>
+                        <li>City: <span id="user-city"></span></li>
+                        <li>Postal Code: <span id="user-postal-code"></span></li>
+                    </ul>
+                </div>
+            </div> 
+
+            <div class="dashboard-content">
+                <h1>Dashboard</h1>
+                
+                <div id="teacher-section" style="display: none;">
+                    <h3>Your Classes</h3>
+                    <div id="classes-list" class="items-list">
+                        <!-- Classes will be listed here -->
+                    </div>
+                </div>
+
+                <div id="student-section" style="display: none;">
+                    <h3>Your Enrolled Classes</h3>
+                    <div id="enrolled-classes-list" class="items-list">
+                        <!-- Enrolled classes will be listed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bug Report Button -->
+    <button class="bug-report-btn" id="bug-report-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/>
+            <circle cx="12" cy="12" r="7"/>
+        </svg>
+        Report a Bug
+    </button>
+
+    <!-- Bug Report Modal -->
+    <div id="bug-report-modal" class="modal-overlay" style="display: none;">
+        <div class="bug-report-modal">
+            <h3>Report a Bug</h3>
+            <form id="bug-report-form" action="https://formsubmit.co/noahwelld@gmail.com" method="POST">
+                <!-- Honeypot -->
+                <input type="text" name="_honey" style="display: none">
+                <!-- Disable Captcha -->
+                <input type="hidden" name="_captcha" value="false">
+                <!-- Success Page - Using current page URL -->
+                <input type="hidden" name="_next" value="https://lexajava.world/profile.html">
+                <!-- Prevent redirect -->
+                <input type="hidden" name="_template" value="table">
+                
+                <div class="form-group">
+                    <label for="bug-type">Type of Bug:</label>
+                    <select id="bug-type" name="Bug Type" required>
+                        <option value="">Select a bug type</option>
+                        <option value="UI Issue">UI Issue</option>
+                        <option value="Functionality Issue">Functionality Issue</option>
+                        <option value="Performance Issue">Performance Issue</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="bug-description">Describe the Bug:</label>
+                    <textarea id="bug-description" name="Bug Description" placeholder="Please explain what happened and how to reproduce the issue..." required></textarea>
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="primary-btn">Submit Report</button>
+                    <button type="button" class="secondary-btn" id="cancel-report">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2025 Lexa Beta. All rights reserved. | <a href="https://github.com/lexa-ca/LexaWebsite">GitHub</a> | <a href="mailto:noahwelld@gmail.com">Contact</a></p>
+    </footer>
+
+    <script src="assets/js/script.js"></script>
+    <script src="assets/js/firebase-auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginContainer = document.getElementById('login-container');
+            const dashboardContainer = document.getElementById('dashboard-container');
+            const loginBtn = document.getElementById('login-btn');
+            const signOutBtn = document.getElementById('sign-out-btn');
+            const loginError = document.getElementById('login-error');
+            const userEmail = document.getElementById('user-email');
+            const userDisplayName = document.getElementById('user-display-name');
+            const userType = document.getElementById('user-type');
+            const userSchool = document.getElementById('user-school');
+            const teacherSection = document.getElementById('teacher-section');
+            const studentSection = document.getElementById('student-section');
+            const classesList = document.getElementById('classes-list');
+            const enrolledClassesList = document.getElementById('enrolled-classes-list');
+
+            // Helper function to get user classes from the database
+            function getUserClasses(userId) {
+                return new Promise((resolve, reject) => {
+                    // Try multiple possible paths where classes might be stored
+                    const classesRef = firebase.database().ref('users/' + userId + '/classes');
+                    
+                    classesRef.once('value')
+                        .then(snapshot => {
+                            const classes = snapshot.val();
+                            if (classes) {
+                                resolve(classes);
+                            } else {
+                                // Try alternative path - sometimes classes are stored directly
+                                const altClassesRef = firebase.database().ref('classes').orderByChild('teacherId').equalTo(userId);
+                                
+                                return altClassesRef.once('value');
+                            }
+                        })
+                        .then(snapshot => {
+                            if (snapshot) {
+                                const classes = snapshot.val();
+                                if (classes) {
+                                    resolve(classes);
+                                } else {
+                                    resolve(null);
+                                }
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching classes:', error);
+                            reject(error);
+                        });
+                });
+            }
+
+            // Debug function to inspect database structure
+            function inspectDatabase(userId) {
+                console.log('Fetching classes for user ID:', userId);
+                
+                // Get user data including classes directly from the user object
+                getUserDetails(userId).then(userData => {
+                    if (userData && userData.classes) {
+                        console.log('Found classes in user object:', userData.classes);
+                        displayClassesFromUserObject(userId, userData.classes);
+                    } else {
+                        console.log('No classes found in user object');
+                        
+                        // Try to load classes using the getUserClasses function
+                        getUserClasses(userId).then(classes => {
+                            if (classes) {
+                                console.log('Found classes using getUserClasses:', classes);
+                                displayClassesFromUserObject(userId, classes);
+                            } else {
+                                console.log('No classes found using getUserClasses either');
+                                classesList.innerHTML = '<p>No classes found. Try creating a class in the Lexa app first.</p>';
+                            }
+                        });
+                    }
+                });
+            }
+            
+            // Helper function to improve class display
+            function displayClassesFromUserObject(userId, classes) {
+                classesList.innerHTML = '';
+                
+                if (!classes || Object.keys(classes).length === 0) {
+                    classesList.innerHTML = '<p>No classes found in user object.</p>';
+                    return;
+                }
+                
+                Object.entries(classes).forEach(([classId, classInfo]) => {
+                    const classItem = document.createElement('div');
+                    classItem.className = 'item-card';
+                    
+                    // Ensure we have proper data or fallbacks
+                    const name = classInfo.name || 'Unnamed Class';
+                    const description = classInfo.description || 'No description available';
+                    const classCode = classInfo.classCode || 'N/A';
+                    
+                    classItem.innerHTML = `
+                        <h4>${name}</h4>
+                        <p>Description: ${description}</p>
+                        <p>Class Code: ${classCode}</p>
+                    `;
+                    
+                    // Add click event to navigate to class details page
+                    classItem.addEventListener('click', () => {
+                        window.location.href = `class-details.html?id=${classId}&owner=${userId}&role=teacher`;
+                    });
+                    
+                    classesList.appendChild(classItem);
+                });
+            }
+
+            // Toggle sidebar functionality
+            const toggleSidebar = document.getElementById('toggle-sidebar');
+            const sidebar = document.querySelector('.dashboard-sidebar');
+            const userInfoSidebar = document.getElementById('user-info-sidebar');
+            
+            if (toggleSidebar) {
+                toggleSidebar.addEventListener('click', () => {
+                    sidebar.classList.toggle('collapsed');
+                    userInfoSidebar.classList.toggle('hidden');
+                    toggleSidebar.classList.toggle('rotated');
+                    
+                    // Force repaint to fix any visual glitches
+                    void sidebar.offsetWidth;
+                });
+                
+                // Handle window resize events for better responsiveness
+                window.addEventListener('resize', () => {
+                    // Make sure all elements are properly sized after resize
+                    if (window.innerWidth <= 600) {
+                        // On very small screens, ensure the UI is sized properly
+                        document.querySelectorAll('.item-card').forEach(card => {
+                            card.style.height = 'auto';
+                        });
+                    }
+                });
+            }
+
+            // Initialize mobile-friendly view
+            function initializeResponsiveLayout() {
+                // Check if we're on a mobile device and adjust accordingly
+                if (window.innerWidth <= 768) {
+                    // Ensure sidebar stays collapsed on mobile by default
+                    sidebar.classList.add('collapsed');
+                    userInfoSidebar.classList.add('hidden');
+                }
+            }
+
+            // Call this when the page loads and when the window resizes
+            window.addEventListener('resize', initializeResponsiveLayout);
+            
+            // Check if user is already logged in
+            onAuthStateChanged((user) => {
+                if (user) {
+                    // User is signed in
+                    loginContainer.style.display = 'none';
+                    dashboardContainer.style.display = 'flex';
+                    
+                    // Initialize responsive layout
+                    initializeResponsiveLayout();
+                    
+                    // Add debug call
+                    inspectDatabase(user.uid);
+                    
+                    // Get user details from database
+                    getUserDetails(user.uid).then((userData) => {
+                        if (userData) {
+                            userEmail.textContent = userData.email || user.email;
+                            userDisplayName.textContent = userData.displayName || 'User';
+                            userType.textContent = userData.type || 'N/A';
+                            userSchool.textContent = userData.school || 'N/A';
+                            
+                            // Display additional user details
+                            document.getElementById('user-pin').textContent = userData.pin || 'N/A';
+                            document.getElementById('user-country').textContent = userData.country || 'N/A';
+                            document.getElementById('user-province').textContent = userData.province || 'N/A';
+                            document.getElementById('user-city').textContent = userData.city || 'N/A';
+                            document.getElementById('user-postal-code').textContent = userData.postalCode || 'N/A';
+
+                            // Show appropriate sections based on user type
+                            if (userData.type === 'TEACHER' || userData.type === 'ADMIN') {
+                                teacherSection.style.display = 'block';
+                                
+                                // Directly try to get the classes from userData
+                                if (userData.classes) {
+                                    displayClassesFromUserObject(user.uid, userData.classes);
+                                } else {
+                                    // Try to fetch classes from different path
+                                    getUserClasses(user.uid).then(classes => {
+                                        if (classes) {
+                                            displayClassesFromUserObject(user.uid, classes);
+                                        } else {
+                                            classesList.innerHTML = '<p>No classes found. Try creating a class in the Lexa app first.</p>';
+                                        }
+                                    }).catch(error => {
+                                        console.error('Error fetching classes:', error);
+                                        classesList.innerHTML = '<p>Error loading classes. Please try again later.</p>';
+                                    });
+                                }
+                            } 
+                            
+                            if (userData.type === 'STUDENT') {
+                                studentSection.style.display = 'block';
+                                fetchStudentClasses(user.uid);
+                            } 
+                        }
+                    }).catch(error => {
+                        console.error('Error fetching user details:', error);
+                    });
+                } else {
+                    // User is signed out
+                    loginContainer.style.display = 'block';
+                    dashboardContainer.style.display = 'none';
+                    teacherSection.style.display = 'none';
+                    studentSection.style.display = 'none';
+                }
+            });
+
+            // Login button click event
+            loginBtn.addEventListener('click', () => {
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+
+                if (!email || !password) {
+                    loginError.textContent = 'Please enter both email and password';
+                    return;
+                }
+
+                signIn(email, password)
+                    .then(() => {
+                        loginError.textContent = '';
+                    })
+                    .catch(error => {
+                        loginError.textContent = error.message;
+                    });
+            });
+
+            // Sign out button click event
+            signOutBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                signOut()
+                    .then(() => {
+                        window.location.href = 'index.html';
+                    })
+                    .catch(error => {
+                        console.error('Error signing out:', error);
+                    });
+            });
+
+            // Function to fetch student's enrolled classes
+            function fetchStudentClasses(userId) {
+                enrolledClassesList.innerHTML = '<p>Loading your classes...</p>';
+                
+                // First check if student classes are in the user object
+                getUserDetails(userId).then(userData => {
+                    if (userData && userData.enrolledClasses) {
+                        // Process enrolled classes from user object
+                        const enrolledClasses = userData.enrolledClasses;
+                        displayStudentClasses(userId, enrolledClasses);
+                    } else {
+                        // Search through all teachers' classes to find ones where this student is enrolled
+                        searchAllTeachersClassesForStudent(userId);
+                    }
+                });
+            }
+            
+            // Function to search through all teachers' classes for student enrollment
+            function searchAllTeachersClassesForStudent(studentId) {
+                // Get all users to check which teachers have classes with this student
+                database.ref('users')
+                    .once('value')
+                    .then((snapshot) => {
+                        const users = snapshot.val();
+                        if (!users) {
+                            enrolledClassesList.innerHTML = '<p>You haven\'t joined any classes yet.</p>';
+                            return;
+                        }
+                        
+                        const enrolledClasses = {};
+                        
+                        // Loop through all users
+                        for (const [teacherId, teacherData] of Object.entries(users)) {
+                            // Skip if user has no classes
+                            if (!teacherData.classes) continue;
+                            
+                            // Loop through teacher's classes
+                            for (const [classId, classData] of Object.entries(teacherData.classes)) {
+                                // Check if this class has students and if our student is in it
+                                if (classData.students && classData.students[studentId]) {
+                                    // Add class to enrolled classes
+                                    enrolledClasses[classId] = {
+                                        teacherId: teacherId,
+                                        ...classData
+                                    };
+                                }
+                            }
+                        }
+                        
+                        // Display the found classes
+                        displayStudentClasses(studentId, enrolledClasses);
+                        
+                        // Save the enrolled classes to studentClasses for future reference
+                        database.ref('studentClasses/' + studentId).set(enrolledClasses);
+                    })
+                    .catch(error => {
+                        console.error('Error searching for enrolled classes:', error);
+                        enrolledClassesList.innerHTML = '<p>Error loading classes. Please try again later.</p>';
+                    });
+            }
+
+            // Display student classes (shared function for both approaches)
+            function displayStudentClasses(userId, enrolledClasses) {
+                enrolledClassesList.innerHTML = '';
+
+                if (!enrolledClasses || Object.keys(enrolledClasses).length === 0) {
+                    enrolledClassesList.innerHTML = '<p>You haven\'t joined any classes yet.</p>';
+                    return;
+                }
+
+                // Display each enrolled class
+                for (const [classId, classInfo] of Object.entries(enrolledClasses)) {
+                    const teacherId = classInfo.teacherId;
+                    if (!teacherId) continue; // Skip if teacherId is missing
+                    
+                    const classItem = document.createElement('div');
+                    classItem.className = 'item-card';
+                    classItem.innerHTML = `
+                        <h4>${classInfo.name || 'Unnamed Class'}</h4>
+                        <p>Description: ${classInfo.description || 'No description available'}</p>
+                        <p>Category: ${classInfo.category || 'N/A'}</p>
+                        <p>Class Code: ${classInfo.classCode || 'N/A'}</p>
+                    `;
+                    
+                    // Add click event to navigate to class details page
+                    classItem.addEventListener('click', () => {
+                        window.location.href = `class-details.html?id=${classId}&owner=${teacherId}&role=student`;
+                    });
+                    
+                    enrolledClassesList.appendChild(classItem);
+                }
+            }
+
+            // Bug Report Functionality
+            const bugReportBtn = document.getElementById('bug-report-btn');
+            const bugReportModal = document.getElementById('bug-report-modal');
+            const bugReportForm = document.getElementById('bug-report-form');
+            const cancelReportBtn = document.getElementById('cancel-report');
+
+            // Show modal when bug report button is clicked
+            bugReportBtn.addEventListener('click', () => {
+                bugReportModal.style.display = 'block';
+            });
+
+            // Hide modal when cancel button is clicked
+            cancelReportBtn.addEventListener('click', () => {
+                bugReportModal.style.display = 'none';
+                bugReportForm.reset();
+            });
+
+            // Handle form submission
+            bugReportForm.addEventListener('submit', (e) => {
+                // Show loading state
+                const submitBtn = bugReportForm.querySelector('button[type="submit"]');
+                submitBtn.textContent = 'Sending...';
+                submitBtn.disabled = true;
+
+                // The form will be handled by FormSubmit.co and redirected back to this page
+            });
+
+            // Close modal when clicking outside
+            bugReportModal.addEventListener('click', (e) => {
+                if (e.target === bugReportModal) {
+                    bugReportModal.style.display = 'none';
+                    bugReportForm.reset();
+                }
+            });
+
+            // Check for success parameter in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('_success')) {
+                const successMessage = document.createElement('div');
+                successMessage.className = 'success-message';
+                successMessage.textContent = 'Thanks for reporting this issue! Your feedback helps us improve Lexa.';
+                document.body.appendChild(successMessage);
+
+                // Remove success message after 5 seconds
+                setTimeout(() => {
+                    successMessage.remove();
+                }, 5000);
+
+                // Clean up the URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        });
+    </script>
+</body>
+</html> 
